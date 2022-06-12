@@ -1,0 +1,71 @@
+$******* SCADE Suite KCG 32-bit 6.6.1 beta (build i1) ********
+** Command: kcg661.exe -config D:/test123/KCG/config.txt
+** Generation date: 2022-06-09T22:04:07
+*************************************************************$
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\lustre_pre.xscade, line 2, character 230
+  at path lustre_logic::lustre_not/
+ Node lustre_not has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator21.xscade, line 2, character 230
+  at path lustre_logic::lustre_if/
+ Node lustre_if has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator31.xscade, line 2, character 230
+  at path lustre_logic::lustre_lt/
+ Node lustre_lt has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator41.xscade, line 2, character 230
+  at path lustre_logic::lustre_le/
+ Node lustre_le has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator6.xscade, line 2, character 230
+  at path lustre_logic::lustre_gt/
+ Node lustre_gt has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator7.xscade, line 2, character 230
+  at path lustre_logic::lustre_ge/
+ Node lustre_ge has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator8.xscade, line 2, character 230
+  at path lustre_logic::lustre_eq/
+ Node lustre_eq has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator9.xscade, line 2, character 230
+  at path lustre_logic::lustre_dif/
+ Node lustre_dif has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator10.xscade, line 2, character 230
+  at path lustre_logic::lustre_and/
+ Node lustre_and has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator111.xscade, line 2, character 230
+  at path lustre_logic::lustre_or/
+ Node lustre_or has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator12.xscade, line 2, character 230
+  at path lustre_math::lustre_plus/
+ Node lustre_plus has no internal state
+ (it should probably be declared as a function)
+*** Type Warning (WAR_151): Internal state expected
+  at file D:/test123\Operator22.xscade, line 2, character 230
+  at path lustre_math::lustre_minus/
+ Node lustre_minus has no internal state
+ (it should probably be declared as a function)
+12 warnings were found
+No error was found
+No failure occurred
+$******* SCADE Suite KCG 32-bit 6.6.1 beta (build i1) ********
+** kcg.log
+** Generation date: 2022-06-09T22:04:11
+*************************************************************$
