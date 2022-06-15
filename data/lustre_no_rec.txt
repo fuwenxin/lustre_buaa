@@ -40,10 +40,10 @@ PackEq -> package lv6id Eq_or_Is lv6id ( ByNameStaticArgList ) ;
 PackBody -> OneDecl PackBody
         -> OneDecl
 
-OneDecl -> ConstDecl
+OneDecl -> NodeDecl
+        -> ConstDecl
         -> TypeDecl
         -> ExtNodeDecl
-        -> NodeDecl
 
 TypedLv6IdsList -> TypedLv6Ids TypedLv6IdsList_1
 TypedLv6IdsList_1 -> ; TypedLv6Ids TypedLv6IdsList_1
@@ -187,7 +187,7 @@ TableLeftItem_1 -> Expression
         -> $
 
 Expression -> Constant ExpressionT1
-        -> lv6idref ExpressionT1
+        -> lv6id ExpressionT1
         -> not Expression ExpressionT1
         -> - Expression ExpressionT1
         -> pre Expression ExpressionT1
@@ -243,8 +243,8 @@ PredefOp -> not
 
 CallByPosExpression -> EffectiveNode ( ExpressionList )
 
-EffectiveNode -> lv6idref << StaticArgList >>
-        -> lv6idref
+EffectiveNode -> lv6id << StaticArgList >>
+        -> lv6id
 
 StaticArgList -> StaticArg StaticArgList_1
 StaticArgList_1 -> StaticArgList_2 StaticArg StaticArgList_1

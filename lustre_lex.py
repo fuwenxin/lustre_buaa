@@ -96,13 +96,15 @@ def t_LV6IDREF(t):
 
 def t_REALCONST(t):
     r'\d+\.\d+'
-    t.value = float(t.value)
+    t.str = float(t.value)
+    t.value = 'realconst'
     return t
 
 
 def t_INTCONST(t):
     r'\d+'
-    t.value = int(t.value)
+    t.str = int(t.value)
+    t.value = 'intconst'
     return t
 
 

@@ -1,34 +1,48 @@
+from audioop import reverse
+import os
 import cfg
 import generate
+import datetime
 from lustre_lex import lexer, get_tokens, token2string, getNfadir
 from recognition import Recognition
 
-def ouput_result(pda, tokens):
+def ouput_result(pda, tokens, reco, c_code, path = 'result/'):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     # 打印词法分析结果
-    print("Tokens:")
-    print("===========")
-    for string_token in tokens:
-        # print(token2string(string_token))
-        print(string_token)
-    print("===========")
+    with open(path + "tokens.txt", "w+") as f:
+        for string_token in tokens:
+            # print(token2string(string_token))
+            if hasattr(string_token, 'str'):
+                f.writelines(str(string_token.str) + " " +  str(string_token) + "\n")
+            else:
+                f.writelines(str(string_token) + "\n")
 
-    flag = input("是否输出词法分析对应的nfa:(y/n)")
+    flag = input("是否输出词法分析对应的nfa:(y/n)[nfa.txt]")
     if flag is "y":
-        print("===========")
         nfa_dir = getNfadir()
-        for token in tokens:
-            nfa = nfa_dir[token.type]
-            print("类型: %10s, 开始状态:%5s, 结束状态:%5s, 状态个数:%5s, NFA:%s"
-                  %(token.type.strip(), nfa[3].strip(), nfa[4].strip(), nfa[2].strip(), nfa[5:]))
-        print("===========")
+        with open(path + "nfa.txt", "w+") as f:
+            for token in tokens:
+                nfa = nfa_dir[token.type]
+                f.writelines("类型: %10s, 开始状态:%5s, 结束状态:%5s, 状态个数:%5s, NFA:%s\n"
+                    %(token.type.strip(), nfa[3].strip(), nfa[4].strip(), nfa[2].strip(), nfa[5:]))
 
-    flag = input("是否输出文法对应的下推自动机:(y/n)")
+    flag = input("是否输出文法对应的下推自动机:(y/n)[dfa.txt]")
     # 打印下推自动机
     if flag is "y":
-        print("===========")
-        print("Pda:")
-        print(pda)
-        print("===========")
+        with open(path + "dfa.txt", "w+") as f:
+            f.writelines(str(pda))
+
+    it = 1
+    
+    with open(path + "reco.txt", "w+") as f:
+        for v in reversed(reco.used):
+            f.writelines(str(it) + " " + str(v) + "\n")
+            it += 1
+
+    with open(path + "result.c", "w+") as f:
+        f.write(c_code)
 
 
 if __name__ == '__main__':
@@ -38,9 +52,9 @@ if __name__ == '__main__':
             grammarString += line
 
     inputString = '''
-    node EDGE (X: bool) returns (Y: bool);
+    node STABLE (in_judge: bool) returns (out_C: int);
     let
-        Y = not (X);
+        out_C = if in_judge then 20 else 30;
     tel
     '''
     # 关键字、变量名、符号
@@ -49,7 +63,19 @@ if __name__ == '__main__':
 
     may_empty_nonterminal = cfg.get_may_empty_nonterminal(grammar)
 
-    ouput_result(pda, string_tokens)
+    reconigtion = Recognition(pda, string_tokens, may_empty_nonterminal)
+    result = reconigtion.is_accept('Start',0)
+    
+
+    if result:
+        print("result : True")
+    else:
+        print("result : False")
+
+    reconigtion.used.reverse()
+    g = generate.Generate(reconigtion.used, string_tokens)
+    ouput_result(pda, string_tokens, reconigtion, g.gen_C(), "result" + datetime.datetime.now().strftime('%Y%m%d%H_%M_%S') + '/')
+
 
 # # 文法单元 -> 前置条件/后置条件
 # # 文法单元 -> 下推自动机  ++
@@ -58,30 +84,3 @@ if __name__ == '__main__':
 # # 文法单元 -> 证明序列的验证
 
 
-
-    print("Recognition:")
-    reconigtion = Recognition(pda, string_tokens, may_empty_nonterminal)
-    result = reconigtion.is_accept('Start',0)
-    print("===========")
-
-    # used = unique_list(reconigtion.used)
-    # print(used)
-    for i in reversed(reconigtion.used):
-        print("~~:", i)
-
-#     # g = generate.Generate()
-#     # print(g.gen_node())
-#     # print(g.gen_not())
-
-#     print()
-
-#     if result:
-#         print("result : True")
-#     else:
-#         print("result : False")
-    # String_2 = '''
-    # node r_edge (X: bool) returns (Y: bool);
-    # let
-    #  Y = false -> X and not pre(X);
-    # tel
-    # '''

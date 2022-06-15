@@ -8,6 +8,14 @@ from lustre_lex import lexer
 resource.setrlimit(resource.RLIMIT_STACK, (2**25, -1))
 sys.setrecursionlimit(10**6)
 
+debug = False
+
+def token2str(token):
+    if hasattr(token, 'str'):
+        return token.str
+    else:
+        return token.value
+
 class Recognition():
 
     def __init__(self, pda, tokens, empty):
@@ -19,7 +27,8 @@ class Recognition():
 
     # only accept final state
     def is_accept(self, cur_state, token_index):
-        print("cur_state :" + cur_state)
+        if debug:
+            print("cur_state :" + cur_state)
         if cur_state.strip() == cfg.END:
             self.used.append(cur_state)
             return True
@@ -36,32 +45,33 @@ class Recognition():
             return False
 
         cur_stack = self.stack.copy()
+        useful_token = self.tokens[token_index]
         for state in self.pda.states[cur_state]:
             cur_token = self.tokens[token_index].value
             if state.read.strip() == cur_token or state.read.strip() == cfg.EPS:
                 if state.action.strip() == 'POP' and len(self.stack) and state.value.strip() == self.stack[-1].strip():
-                    print("=========pop")
-                    print(cur_state)
-                    print(state)
-                    print(self.stack)
-                    print(self.tokens[token_index])
-                    print(str(token_index) + " " + str(len(self.tokens)))
+                    if debug:
+                        print("=========pop")
+                        print(cur_state)
+                        print(state)
+                        print(self.stack)
+                        print(self.tokens[token_index])
                     self.stack.pop()
                     if self.is_accept(state.next, token_index if state.read.strip() == cfg.EPS else token_index + 1):
-                        self.used.append(cur_state)
+                        self.used.append((cur_state, token2str(useful_token)))
                         return True
                     else:
                         self.stack = cur_stack.copy()
                 elif state.action.strip() == 'PUSH':
-                    print("=========push")
-                    print(cur_state)
-                    print(state)
-                    print(self.stack)
-                    print(self.tokens[token_index])
-                    print(str(token_index) + " " + str(len(self.tokens)))
+                    if debug:
+                        print("=========push")
+                        print(cur_state)
+                        print(state)
+                        print(self.stack)
+                        print(self.tokens[token_index])
                     self.stack.append(state.value)
                     if self.is_accept(state.next, token_index if state.read.strip() == cfg.EPS else token_index + 1):
-                        self.used.append(cur_state)
+                        self.used.append((cur_state, token2str(useful_token)))
                         return True
                     else:
                         self.stack = cur_stack.copy()
