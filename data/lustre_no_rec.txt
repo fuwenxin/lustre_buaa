@@ -67,9 +67,11 @@ ConstDeclList-> OneConstDecl ; ConstDeclList
 
 OneConstDecl -> lv6id OneConstDecl_1
 OneConstDecl_1 -> : Type
-        -> , lv6id { , lv6id } : Type
+        -> , lv6id OneConstDecl_2 : Type
         -> : Type = Expression
         -> = Expression
+OneConstDecl_2 -> , lv6id OneConstDecl_2 | , lv6id
+
 
 TypeDecl -> type TypeDeclList 
 
@@ -150,7 +152,7 @@ LocalConsts -> const ConstDeclList
 
 LocalVars -> var VarDeclList ;
 
-VarDeclList -> VarDecl
+VarDeclList -> VarDecl VarDeclList_1                    
 VarDeclList_1 -> ; VarDecl VarDeclList_1
         -> $
 
@@ -389,7 +391,8 @@ Select -> true ExpressionT1 .. Expression Step
         -> $ ExpressionT1 .. Expression Step
         -> ( ExpressionList ) ExpressionT1 .. Expression Step
         -> merge lv6id MergeCaseList ExpressionT1 .. Expression Step
-        Step -> step Expression
+        
+Step -> step Expression
         -> $
 
 Pragma -> % TK IDENT : TK IDENT % Pragma

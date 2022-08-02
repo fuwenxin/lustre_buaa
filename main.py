@@ -1,26 +1,28 @@
 from audioop import reverse
 import os
+
+from pygments import lex
 import cfg
 import generate
 import datetime
-from lustre_lex import lexer, get_tokens, token2string, getNfadir
+from lustre_lex import get_tokens, getNfadir, lustre_lex
 from recognition import Recognition
 
 def ouput_result(pda, tokens, reco, c_code, path = 'result/'):
     if not os.path.exists(path):
         os.makedirs(path)
 
+    lex_ = lustre_lex()
+    lex_.set_tokens(tokens)
+
     # 打印词法分析结果
     with open(path + "tokens.txt", "w+") as f:
+        lex_.output_program(f)
         for string_token in tokens:
-            # print(token2string(string_token))
-            if hasattr(string_token, 'str'):
-                f.writelines(str(string_token.str) + " " +  str(string_token) + "\n")
-            else:
-                f.writelines(str(string_token) + "\n")
+            f.writelines(str(string_token) + "\n")
 
     flag = input("是否输出词法分析对应的nfa:(y/n)[nfa.txt]")
-    if flag is "y":
+    if flag == "y":
         nfa_dir = getNfadir()
         with open(path + "nfa.txt", "w+") as f:
             for token in tokens:
@@ -30,14 +32,14 @@ def ouput_result(pda, tokens, reco, c_code, path = 'result/'):
 
     flag = input("是否输出文法对应的下推自动机:(y/n)[dfa.txt]")
     # 打印下推自动机
-    if flag is "y":
+    if flag == "y":
         with open(path + "dfa.txt", "w+") as f:
             f.writelines(str(pda))
 
     it = 1
     
     with open(path + "reco.txt", "w+") as f:
-        for v in reversed(reco.used):
+        for v in reco.used:
             f.writelines(str(it) + " " + str(v) + "\n")
             it += 1
 
@@ -59,6 +61,7 @@ if __name__ == '__main__':
     '''
     # 关键字、变量名、符号
     string_tokens = get_tokens(inputString)
+    
     grammar, pda = cfg.create_pda(grammarString)
 
     may_empty_nonterminal = cfg.get_may_empty_nonterminal(grammar)

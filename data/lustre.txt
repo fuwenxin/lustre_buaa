@@ -1,6 +1,6 @@
 Program -> Include PackBody
         -> Include PackList
-        -> PackBody | PackList
+        -> PackBody | PackList  # 0
 
 PackList -> OnePack PackList | OnePack
 
@@ -27,14 +27,14 @@ Eq_or_Is -> = | is
 
 PackEq -> package lv6id Eq_or_Is lv6id ( ByNameStaticArgList ) ;
 
-PackBody -> OneDecl PackBody | OneDecl
+PackBody -> OneDecl PackBody | OneDecl                         # 1
 
-OneDecl -> ConstDecl | TypeDecl | ExtNodeDecl | NodeDecl
+OneDecl -> ConstDecl | TypeDecl | ExtNodeDecl | NodeDecl         # 3
 
 TypedLv6IdsList -> TypedLv6Ids TypedLv6IdsList_1
 TypedLv6IdsList_1 -> ; TypedLv6Ids TypedLv6IdsList_1 | $
 
-TypedLv6Ids-> lv6id Uses_1 : Type
+TypedLv6Ids-> lv6id Uses_1 : Type                                    #
 
 TypedValuedLv6Ids -> TypedValuedLv6Id TypedValuedLv6Ids_1
 TypedValuedLv6Ids_1 ->  ; TypedValuedLv6Id TypedValuedLv6Ids_1 | $
@@ -46,8 +46,8 @@ ConstDecl->const ConstDeclList
 
 ConstDeclList-> OneConstDecl ; ConstDeclList | OneConstDecl ;
 
-OneConstDecl -> lv6id OneConstDecl_1
-OneConstDecl_1 ->  : Type | , lv6id { , lv6id } : Type | : Type = Expression | = Expression
+OneConstDecl -> lv6id OneConstDecl_1         #
+OneConstDecl_1 ->  : Type | , lv6id { , lv6id } : Type | : Type = Expression | = Expression      # 0
 
 TypeDecl -> type TypeDeclList
 
@@ -56,21 +56,21 @@ TypeDeclList-> OneTypeDecl ; TypeDeclList | OneTypeDecl ;
 OneTypeDecl -> lv6id OneTypeDecl_1 | $
 OneTypeDecl_1 -> = OneTypeDecl_2
 OneTypeDecl_2 -> Type | enum { lv6id Uses_1 } | OneTypeDecl_3 { TypedValuedLv6Ids OneTypeDecl_4 }
-Uses_1 ->  , lv6id Uses_1 | $
+Uses_1 ->  , lv6id Uses_1 | $                                 #
 OneTypeDecl_3 -> struct | $
 OneTypeDecl_4 -> ; | $
 
-Type -> Type_1 Type_2
-Type_1 ->  bool | int | real | lv6idref
-Type_2 ->  ^ Expression Type_2 | $
+Type -> Type_1 Type_2                                          #
+Type_1 ->  bool | int | real | lv6idref                        #
+Type_2 ->  ^ Expression Type_2 | $                             #
 
 ExtNodeDecl -> ExtNodeDecl_1 lv6id Params returns Params OneTypeDecl_4
 ExtNodeDecl_1 -> externfunction | unsafeexternfunction | externnode | unsafeexternnode
 
 
-NodeDecl -> LocalNode
+NodeDecl -> LocalNode            # 
 
-LocalNode -> node lv6id StaticParams Params returns Params OneTypeDecl_4 LocalDecls Body LocalNode_1
+LocalNode -> node lv6id StaticParams Params returns Params OneTypeDecl_4 LocalDecls Body LocalNode_1        #
 	    -> function lv6id StaticParams Params returns Params OneTypeDecl_4 LocalDecls Body LocalNode_1
 	    -> node lv6id StaticParams NodeProfileOpt = EffectiveNode OneTypeDecl_4
 	    -> function lv6id StaticParams NodeProfileOpt = EffectiveNode OneTypeDecl_4
@@ -83,67 +83,67 @@ LocalNode_1 -> . | OneTypeDecl_4
 
 NodeProfileOpt -> Params returns Params | $
 
-StaticParams -> << StaticParamList >> | $
+StaticParams -> << StaticParamList >> | $                                  #
 
-StaticParamList -> StaticParam StaticParamList_1
-StaticParamList_1 -> ; StaticParam StaticParamList_1 | $
+StaticParamList -> StaticParam StaticParamList_1                                        #
+StaticParamList_1 -> ; StaticParam StaticParamList_1 | $                   #
 
-StaticParam-> type lv6id
+StaticParam-> Type lv6id                                                      #
 	       -> const lv6id : Type
 	       -> node lv6id Params returns Params
 	       -> function lv6id Params returns Params
 	       -> unsafenode lv6id Params returns Params
 	       -> unsafefunction lv6id Params returns Params
 
-Params -> ( Params_1
-Params_1 ->  VarDeclList OneTypeDecl_4 ) | )
+Params -> ( Params_1 )                                                  # 
+Params_1 ->  VarDeclList OneTypeDecl_4  | $                             #
 
 
-LocalDecls -> LocalDeclList | $
+LocalDecls -> LocalDeclList | $                                          #
 
-LocalDeclList -> OneLocalDecl LocalDeclList | OneLocalDecl
+LocalDeclList -> OneLocalDecl LocalDeclList | OneLocalDecl                 # 
 
-OneLocalDecl-> LocalVars | LocalConsts
+OneLocalDecl-> LocalVars | LocalConsts                                    #
 
 LocalConsts -> const ConstDeclList
 
 LocalVars -> var VarDeclList ;
 
-VarDeclList -> VarDecl
-VarDeclList_1 -> ; VarDecl VarDeclList_1 | $
+VarDeclList -> VarDecl VarDeclList_1                                          #
+VarDeclList_1 -> ; VarDecl VarDeclList_1 | $                                  #
 
-VarDecl -> TypedLv6Ids
+VarDecl -> TypedLv6Ids                                                        #
 	    -> TypedLv6Ids when ClockExpr
 	    -> ( TypedLv6IdsList ) when ClockExpr
 
-Body -> let Body_1
-Body_1 -> EquationList tel | tel
+Body -> let Body_1 tel                                                           #
+Body_1 -> EquationList | $                                                        #
 
-EquationList -> Equation EquationList | Equation
+EquationList -> Equation EquationList | Equation                                  # 
 
-Equation -> assert Expression ; | Left = Expression ;
+Equation -> assert Expression ; | Left = Expression ;                            # 1
 
-Left -> LeftItemList | ( LeftItemList )
+Left -> LeftItemList | ( LeftItemList )                                         # 
 
-LeftItemList -> LeftItem
+LeftItemList -> LeftItem LeftItemList_1                                            #  TODO more
 LeftItemList_1 ->  , LeftItem LeftItemList_1 | $
 
-LeftItem -> lv6id | FieldLeftItem | TableLeftItem
+LeftItem -> lv6id | FieldLeftItem | TableLeftItem                              # 0
 
 FieldLeftItem -> LeftItem . lv6id
 
 TableLeftItem -> LeftItem TableLeftItem_1
 TableLeftItem_1 ->  Expression | Select | $
 
-Expression -> Constant
-            -> lv6idref
-            -> not Expression
-            -> - Expression
+Expression -> Constant                                          #
+            -> lv6idref                                         #
+            -> not Expression                                   #
+            -> - Expression                                     #
             -> pre Expression
             -> current Expression
             -> int Expression
             -> real Expression
-            -> if Expression then Expression else Expression
+            -> if Expression then Expression else Expression     #
             -> with Expression then Expression else Expression
 	    -> # ( ExpressionList )
             -> nor ( ExpressionList )

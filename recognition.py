@@ -47,7 +47,7 @@ class Recognition():
         cur_stack = self.stack.copy()
         useful_token = self.tokens[token_index]
         for state in self.pda.states[cur_state]:
-            cur_token = self.tokens[token_index].value
+            cur_token = self.tokens[token_index].value.strs
             if state.read.strip() == cur_token or state.read.strip() == cfg.EPS:
                 if state.action.strip() == 'POP' and len(self.stack) and state.value.strip() == self.stack[-1].strip():
                     if debug:
@@ -58,7 +58,7 @@ class Recognition():
                         print(self.tokens[token_index])
                     self.stack.pop()
                     if self.is_accept(state.next, token_index if state.read.strip() == cfg.EPS else token_index + 1):
-                        self.used.append((cur_state, token2str(useful_token)))
+                        self.used.append((cur_state, useful_token))
                         return True
                     else:
                         self.stack = cur_stack.copy()
@@ -71,7 +71,7 @@ class Recognition():
                         print(self.tokens[token_index])
                     self.stack.append(state.value)
                     if self.is_accept(state.next, token_index if state.read.strip() == cfg.EPS else token_index + 1):
-                        self.used.append((cur_state, token2str(useful_token)))
+                        self.used.append((cur_state, useful_token))
                         return True
                     else:
                         self.stack = cur_stack.copy()

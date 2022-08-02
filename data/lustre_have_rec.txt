@@ -266,6 +266,6 @@ Select	-> Expression .. Expression Step
 
 Step	-> step Expression | $
 
-Pragma	-> % TK IDENT : TK IDENT % Pragma | $
+Pragma	-> % lv6id : lv6id % Pragma | $
 
 Include -> include "<string>"

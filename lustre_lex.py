@@ -1,4 +1,24 @@
+import sys
 import ply.lex as lex
+
+class lex_value:
+    def __init__(self, strs = None, value = None, scope = None) -> None:
+        self.strs = strs
+        self.value = value
+        self.scope = scope
+        self.type = None
+        self.entity = None
+        self.syms = list()
+        self.rets = list()
+    
+    def set_value(self, value):
+        self.value = value
+
+    def set_scope(self, scope):
+        self.scope = scope
+
+    def __repr__(self) -> str:
+        return  str(self.value) + " #" + str(self.scope) 
 
 reserved = {
     'bool': "BOOL",
@@ -83,30 +103,26 @@ tokens = [
     'SHIFT',  # =>
     'TPOINT',  # ..
     'GREATER',  # >
-    "LV6ID"  # ++
+    "LV6ID"  # id
 ] + list(reserved.values())
 
 
 def t_LV6IDREF(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*::[a-zA-Z0-9_]+'
-    t.str = str(t.value)
-    t.value = 'lv6idref'
+    t.value = lex_value('lv6idref', t.value)
     return t
 
 
 def t_REALCONST(t):
     r'\d+\.\d+'
-    t.str = float(t.value)
-    t.value = 'realconst'
+    t.value = lex_value('realconst', float(t.value))
     return t
 
 
 def t_INTCONST(t):
     r'\d+'
-    t.str = int(t.value)
-    t.value = 'intconst'
+    t.value = lex_value('intconst', int(t.value))
     return t
-
 
 t_BOOL = r'bool'
 t_REAL = r'real'
@@ -185,10 +201,10 @@ def t_LV6ID(t):
     r'[a-zA-Z_][a-zA-Z0-9_]*'
     t.type = reserved.get(t.value, 'LV6ID')
     if not reserved.get(t.value):
-        t.str = t.value
-        t.value = 'lv6id'
+        t.value = lex_value('lv6id', t.value)
+    else:
+        t.value = lex_value(t.value, t.value)
     return t
-
 
 def t_newline(t):
     r'\n+'
@@ -199,10 +215,6 @@ def t_error(t):
     print("Illegal charactor '%s'" % t.value[0])
     t.lexer.skip(1)
 
-
-lexer = lex.lex()
-
-
 def get_tokens(inputString):
     lexer.input(inputString)
     string_tokens = list()
@@ -210,7 +222,10 @@ def get_tokens(inputString):
         tok = lexer.token()
         if not tok:
             break
+        if type(tok.value) == str:
+            tok.value = lex_value(tok.value, tok.value)
         string_tokens.append(tok)
+    get_scope(string_tokens)
     return string_tokens
 
 def token2string(token):
@@ -234,6 +249,78 @@ def getNfadir():
             nfa_dir[type] = n[1:]
     return nfa_dir
 
+def increase_scope(scope) -> str:
+    scopes = scope.split(".")
+    if len(scopes) == 1:
+        return str(int(scopes[0]) + 1)
+    else:
+        scopes[-1] = str(int(scopes[-1]) + 1)
+        return '.'.join(scopes)
+            
+def get_scope(tokens) -> bool:
+    stack = list()
+    scope = str()
+    cur_line = 0
+
+    for i, tok in enumerate(tokens):
+        if len(stack) == 0:
+            stack.append([i, "1"])
+            scope = stack[-1][1]
+        elif tok.type == "LET":
+            tmp = stack[-1][1] + ".1"
+            stack.append([i, tmp]) 
+            scope = stack[-1][1]
+        elif tok.type == "TEL":
+            scope = increase_scope(stack[-1][1])
+            if tokens[stack[-1][0]].type == "LET":
+                stack.pop()
+            else:
+                print("Error let/tel at " + str(tok.lineno) + "," + str(tok.lexpos))
+                return False
+        elif tok.lineno != cur_line:
+            stack[-1][1] = increase_scope(stack[-1][1])
+            scope = stack[-1][1]
+        
+        cur_line = tokens[i].lineno
+        tokens[i].value.scope = scope   
+    return True        
+
+def get_raw_lexer():
+    return lexer
+
+class lustre_lex:
+    def __init__(self):
+        self.toks = list()
+        self.index = 0
+
+    def set_tokens(self, toks):
+        self.index = 0
+        self.toks = toks
+
+    def token(self):
+        if self.index >= len(self.toks):
+            return None
+        tmp = self.toks[self.index]
+        self.index += 1
+        return tmp
+
+    def input(self, strs):
+        pass
+
+    def output_program(self, f):
+        scope = ""
+        cur_line = self.toks[0].lineno
+        f.write("--------------program----------------\n")
+        for tok in self.toks:
+            if cur_line != tok.lineno:
+                f.write("{0:>10}\n".format("#" + scope))
+                cur_line = tok.lineno
+            f.write(str(tok.value.value) + " ")
+            scope = tok.value.scope
+        f.write("{0:>10}\n".format("#" + scope))
+        f.write("--------------------------------------\n")
+
+lexer = lex.lex()
 
 if __name__ == '__main__':
     data = '''
@@ -246,11 +333,9 @@ if __name__ == '__main__':
      Y = false -> X and not pre(X);
     tel
     '''
-    lexer.input(data)
-    while True:
-        tok = lexer.token()
-        if not tok:
-            break
-        print(tok)
-        if hasattr(tok, 'str'):
-            print(tok.str)
+    toks = get_tokens(data)
+    for tok in toks:
+        print(tok, tok.value.strs)
+    lex_ = lustre_lex()
+    lex_.set_tokens(toks)
+    
